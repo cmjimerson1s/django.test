@@ -1,43 +1,85 @@
 {% extends "base.html" %}
 {% block content %}
-<!-- <div class="d-flex flex-row">
-{% for result in results %}
-        <div class="flex-grow-1">
-             <h1>{{ result}}</h1>
-        </div>
+
+<div class="d-flex flex-row">
+  {% for result in results %}
+      <div class="flex-grow-1">
+              <table>
+                  <thead>
+                      {% for key, values in result.items %}
+                          <tr>
+                              <th>{{key}}</th>
+                          </tr>
+                  </thead>
+                  <tbody>
+                      {% for value in values %}
+                          <tr>
+                              <td id="iterate-{{ forloop.counter }}">
+                                <form method="POST" action="{% url 'reservation' %}" class="me-2 ms-2" required>
+                                  {% csrf_token %}
+                                  <input type="hidden" name="key" value="{{ key }}">
+                                  <input type="hidden" name="value" value="{{ value }}">
+                                  <button type="submit" id="button{{ forloop.counter }}" class="btn btn-primary text-white">{{ value }}</button>
+                                </form>
+                              </td>
+                          </tr>
+                      {% endfor %}
+                      {% endfor %}
+                  </tbody>
+              </table>
+      </div>
+  {% endfor %} 
+</div>
+<button id="change-color">Change Color</button>
+
+<script>
+  // Get all list items using a CSS selector
+  var items = document.querySelectorAll("button");
+
+  // Loop through each list item
+  items.forEach(function(value) {
+    // Check if the inner HTML of the item is "501"
+    if (value.innerHTML != "45") {
+      // If it is, change the inner HTML to "888"
+      value.innerHTML = "Available";
+    } else if (value.innerHTML === "45") {
+      value.innerHTML = "Unavailable"
+      value.disabled = true
+    }
+  });
+</script>  
+
+<!-- {% for result in results %}
+{% for value in result.my_key %}
+      <button class="myButton" data-value="{{ value }}">{{ value }}</button>
 {% endfor %}
-</div> -->
-{% for result in results %}
-    
-
-
-<ul>
-    {% for key, values in result.items %}
-      <h1>{{ key }}</h1>
-      <ul>
-        {% for value in values %}
-          <li id="iterate-{{ forloop.counter }}">{{ value }}</li>
-        {% endfor %}
-      </ul>
-    {% endfor %}
-  </ul>
-
-  {% endfor %}
+    <form id="myForm" method="post">
+      {% csrf_token %}
+      <input type="hidden" name="key" value="{{ result.my_key }}">
+      <input type="hidden" name="value" id="myValue">
+      <button type="submit" id="submitButton" disabled>Submit</button>
+    </form>
+{% endfor %}
   
+    <script>
+      $(document).ready(function() {
+        $('.myButton').click(function() {
+          $('#submitButton').prop('disabled', false);
+          $('#myValue').val($(this).data('value'));
+        });
+        $('#myForm').submit(function(event) {
+          event.preventDefault();
+          $.ajax({
+            url: '{% url "reservation" %}',
+            data: $(this).serialize(),
+            dataType: 'json',
+            type: 'post',
+            success: function(data) {
+              console.log(data.key, data.value);
+              // Do something with the key-value pair
+            }
+          });
+        });
+      }); -->
 
-  <script>
-    // Get all list items using a CSS selector
-    var items = document.querySelectorAll("li");
-  
-    // Loop through each list item
-    items.forEach(function(value) {
-      // Check if the inner HTML of the item is "501"
-      if (value.innerHTML === "501") {
-        // If it is, change the inner HTML to "888"
-        value.innerHTML = "Available";
-      } else if (value.innerHTML === "45") {
-        value.innerHTML = "Unavailable"
-      }
-    });
-  </script>  
 {% endblock %}

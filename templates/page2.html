@@ -1,3 +1,58 @@
-{% extend base.html %}
+{% extends "base.html" %}
 {% block content %}
+<div class="d-flex flex-row">
+    {% for result in results %}
+        <div class="flex-grow-1">
+                <table>
+                    <thead>
+                        {% for key, values in result.items %}
+                            <tr>
+                                <th>{{key}}</th>
+                            </tr>
+                    </thead>
+                    <tbody>
+                        {% for value in values %}
+                            <tr>
+                                <td id="iterate-{{ forloop.counter }}">
+                                  <form method="POST" action="{% url 'reservation' %}" class="me-2 ms-2" required>
+                                    {% csrf_token %}
+                                    <input type="hidden" name="key" value="{{ key }}">
+                                    <input type="hidden" name="value" value="{{ value }}">
+                                    <button type="submit" id="button{{ forloop.counter }}" class="btn btn-primary text-white">{{ value }}</button>
+                                  </form>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+        </div>
+    {% endfor %} 
+  </div>
+    {% for choice in choices %}
+        {% for key, value in choice.items %}
+            <h1>{{ key }}</h1>
+            <h1>{{ value }}</h1>
+        {% endfor %}
+    {% endfor %}
+  <script>
+    // Get all list items using a CSS selector
+    var items = document.querySelectorAll("button");
+  
+    // Loop through each list item
+    items.forEach(function(value) {
+      // Check if the inner HTML of the item is "501"
+      if (value.innerHTML != "45") {
+        // If it is, change the inner HTML to "888"
+        value.innerHTML = "Available";
+      } else if (value.innerHTML === "45") {
+        value.innerHTML = "Unavailable"
+        value.disabled = true
+      }
+    });
+  </script>  
+<h1>
+    {{ room }}
+    {{ time }}
+</h1>
 {% endblock %}

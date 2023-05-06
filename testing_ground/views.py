@@ -1,6 +1,8 @@
 from django.shortcuts import render
 from .models import Reservation, Time, Room
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
+from django import forms
+from .forms import MyForm
 
 
 # Create your views here.
@@ -50,6 +52,7 @@ def add_values_in_dict(sample_dict, key, list_of_values):
 
 
 def resultView(request):
+    form = MyForm()
     template = "page1.html"
     specific_date = '2023-05-07'
     specific_times = Time.objects.all()
@@ -69,7 +72,7 @@ def checkRes(room, date, time):
         result = 45
         return result
     else:
-        result = 501
+        result = time
         return result
 
 def timeChecks(room, date, times):
@@ -86,3 +89,61 @@ def dayView(rooms, date, times):
         list_pairs = {room: time_list}
         result.append(list_pairs)
     return result
+
+def checkedBox(request):
+    template = "page2.html"
+    selected_game = request.POST['selection']
+
+
+class MyForm(forms.Form):
+    key = forms.CharField()
+    value = forms.CharField()
+
+def my_view(request):
+    if request.method == 'POST':
+        form = MyForm(request.POST)
+        if form.is_valid():
+            my_key = form.cleaned_data['key']
+            my_value = form.cleaned_data['value']
+            data = {
+                'key': my_key,
+                'value': my_value,
+            }
+            return JsonResponse(data)
+    else:
+        form = MyForm()
+    return render(request, 'page1.html', {'form': form})
+
+
+def choiceView(request):
+    template = "page2.html"
+    room_data = request.POST['key']
+    time_data = request.POST['value']
+
+    reservation_choice = selectionArray(room_data, time_data)
+
+    specific_date = '2023-05-07'
+    specific_times = Time.objects.all()
+    room_list = Room.objects.all()
+
+    results = dayView(room_list, specific_date, specific_times)
+
+    context = {
+        'choices': reservation_choice,
+        'results': results
+    }
+
+    return render(request, template, context)
+
+
+def selectionArray(room, time):
+    room_data = room
+    time_data = time
+    new_dict = {room_data: time_data}
+
+    choice_array = []
+
+    if new_dict not in choice_array:
+        choice_array.append(new_dict)
+
+    return choice_array
