@@ -1,8 +1,10 @@
 {% extends "base.html" %}
 {% block content %}
-{{ specific_date }}
-This was the reservation just chosen {{ reservation }}
-This is every reservation chosen {{ choices }}
+{{ selected_date }}
+{{ update_list }}
+This is what was chosen previosuly: {{ choices }}
+This was what was chosen before {{ new_list }}
+This is the list combined {{ combined_list }}
 <div class="d-flex flex-row">
     {% for result in results %}
         <div class="flex-grow-1">
@@ -17,13 +19,14 @@ This is every reservation chosen {{ choices }}
                         {% for value in values %}
                             <tr>
                                 <td id="iterate-{{ forloop.counter }}">
-                                  <form method="POST" action="{% url 'reservation' %}" class="me-2 ms-2" required>
+                                  <form method="POST" action="{% url 'reservation_multi' %}" class="me-2 ms-2" required>
                                     {% csrf_token %}
                                     <input type="hidden" name="key" value="{{ key }}">
                                     <input type="hidden" name="value" value="{{ value }}">
-                                    <input type="hidden" name="selected_date" value="{{ specific_date }}">
-                                    <input type="hidden" name="choices" value="{{ choices }}">
-                                    <button type="submit" id="button{{ forloop.counter }}" class="btn btn-primary text-white" data-key="{{ key }}" data-value="{{ value }}">{{ value }}</button>
+                                    <input type="hidden" name="selected_date" value="{{selected_date}}">
+                                    <input type="hidden" name="chosen_rooms" value="{{ choices }}">
+                                    <input type="hidden" name="selected_room_list" value="{{combined_list}}">
+                                    <button type="submit" id="button{{ forloop.counter }}" class="btn btn-primary text-white">{{ value }}</button>
                                   </form>
                                 </td>
                             </tr>

@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
-
+{{ selected_date }}
+{{ choices }}
 <div class="d-flex flex-row">
   {% for result in results %}
       <div class="flex-grow-1">
@@ -19,7 +20,9 @@
                                   {% csrf_token %}
                                   <input type="hidden" name="key" value="{{ key }}">
                                   <input type="hidden" name="value" value="{{ value }}">
-                                  <button type="submit" id="button{{ forloop.counter }}" class="btn btn-primary text-white">{{ value }}</button>
+                                  <input type="hidden" name="selected_date" value="{{ selected_date }}">
+                                  <input type="hidden" name="choices" value="{{ choices }}">
+                                  <button type="submit"  class="my-button btn btn-primary text-white" data-key="{{ key }}" data-value="{{ value }}">{{ value }}</button>
                                 </form>
                               </td>
                           </tr>
@@ -30,7 +33,7 @@
       </div>
   {% endfor %} 
 </div>
-<button id="change-color">Change Color</button>
+<h1></h1>
 
 <script>
   // Get all list items using a CSS selector
@@ -38,15 +41,74 @@
 
   // Loop through each list item
   items.forEach(function(value) {
+    let counter = 0;
     // Check if the inner HTML of the item is "501"
     if (value.innerHTML != "45") {
       // If it is, change the inner HTML to "888"
       value.innerHTML = "Available";
+      
     } else if (value.innerHTML === "45") {
       value.innerHTML = "Unavailable"
       value.disabled = true
     }
   });
+
+
+ 
+  document.querySelectorAll('.my-button').forEach(function(button){
+    let counter = 0;
+    if (counter <= 4) {
+      button.addEventListener('click', function(event){
+        let key = button.getAttribute('data-key');
+        let value = button.getAttribute('data-value');
+        let h1 = document.createElement("h1");
+        h1.textContent = `${key}: ${value}`;
+        document.body.appendChild(h1);
+        counter++;
+    })}
+    }
+  )
+  
+
+// // Get all the buttons with the class "my-button"
+// const buttons = document.querySelectorAll(".my-button");
+
+// // Initialize a counter to keep track of the number of h1 elements generated
+// let counter = 0;
+
+// // Add a click event listener to each button
+// if (counter <= 4) {
+//   buttons.forEach(button => {
+//     button.addEventListener("click", () => {
+//       // Get the key and value data from the button
+//       const key = button.dataset.key;
+//       const value = button.dataset.value;
+      
+//       // Create a new h1 element and append it to the body
+//       const h1 = document.createElement("h1");
+//       h1.textContent = `${key}: ${value}`;
+//       document.body.appendChild(h1);
+      
+//       // Increment the counter
+//       counter++;
+//       console.log(counter)
+//     })
+// })
+// } else { 
+//       buttons.forEach(button => {
+//         button.removeEventListener("click");
+//       });
+//     }
+
+
+
+    // // If the counter is greater than or equal to 4, remove the event listener from all buttons
+    // if (counter >= 4) {
+    //   buttons.forEach(button => {
+    //     button.removeEventListener("click");
+    //   });
+    // }
+  
 </script>  
 
 <!-- {% for result in results %}
