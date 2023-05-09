@@ -19,7 +19,7 @@ class ResForm(forms.ModelForm):
 class TestForm(forms.ModelForm):
     class Meta:
         model = TestModel
-        fields = ['name', 'email', 'date', 'room', 'time']
+        fields = ['name', 'email']
         widget = {
             'date': forms.HiddenInput(),
             'room': forms.HiddenInput(),

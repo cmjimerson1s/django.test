@@ -13,6 +13,7 @@ urlpatterns = [
     path('third_view/<str:our_variable>', views.ThirdView.as_view(), name='third_view'),
     # path('booking', views.BookingsView.as_view(), name='booking'),
     path('booking', views.CartView, name='booking'),
+    path('posted', views.update_database, name='posted')
 ]
 
     # path('update/<str:selected_room>/<str:selected_time>/<str:specific_date>/', ResUpdate.as_view(), name='reservation_update'),

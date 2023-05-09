@@ -818,27 +818,42 @@ def CartView(request):
         dataset = (game_data,)
     else:
         dataset = game_data
-
-    context = {'cart': cart, 'string': string, 'data': dataset}
+    context = {'cart': cart, 'string': string, 'data': dataset,}
     return render(request, 'booking.html', context, )
 
 def update_database(request):
     if request.method == 'POST':
-        form = TestForm(request.POST)
-        if form.is_valid():
-            instance = form.save(commit=False)
-            instance.date = request.POST.get('date')
-            instance.room = request.POST.get('room')
-            instance.time = request.POST.get('time')
-            instance.save()
-            return HttpResponse('Data saved successfully.')
-    else:
-        form = TestForm(initial={
-            'date': '2023-05-10',  # replace with actual autofilled value
-            'room': 'Room 1',  # replace with actual autofilled value
-            'time': '12:00',  # replace with actual autofilled value
-        })
-    return render(request, 'update_database.html', {'form': form})
+        name = request.POST.get('name')
+        email = request.POST.get('email')
+        date = request.POST.get('date')
+        room = request.POST.get('room')
+        time = request.POST.get('time')
+
+        # Create a new instance of the TestModel and set its attributes
+        instance = TestModel()
+        instance.name = name
+        instance.email = email
+        instance.date = date
+        instance.room = room
+        instance.time = time
+        instance.save()
+
+        return HttpResponse('Data saved successfully.')
+
+    # If the request method is not POST, return an empty form
+    return render(request, 'update_database.html')
+    
+    #     if form.is_valid():
+    #         instance = form.save(commit=False)
+    #         instance.name = request.POST.get('name')
+    #         instance.email = request.POST.get('email')
+    #         instance.date = request.POST.get('date')
+    #         instance.room = request.POST.get('room')
+    #         instance.time = request.POST.get('time')
+    #         instance.save()
+    #         return HttpResponse('Data saved successfully.')
+        
+    # return render(request, 'booking.html', {'form': form})
 
 def countData(dict):
     my_dict = dict
@@ -852,3 +867,29 @@ def countData(dict):
 def testMore(data):
     my_tuple = tuple(my_dict.items())
     return my_tuple
+
+
+class UpdateBooking(View):
+    template_name = 'booking.html'
+
+    def get(self, request, *args, **kwargs):
+        cart = request.GET.get('cart')
+        string = cart.replace('[', '').replace(']', '').replace('"', '')
+        game_data = ast.literal_eval(string)
+        if isinstance(game_data, dict):
+            dataset = (game_data,)
+        else:
+            dataset = game_data
+        context = {'cart': cart, 'string': string, 'data': dataset}
+        return render(request, self.template_name, context)
+
+    def post(self, request, *args, **kwargs):
+        form = TestForm(request.POST)
+        if form.is_valid():
+            instance = form.save(commit=False)
+            instance.date = request.POST.get('date')
+            instance.room = request.POST.get('room')
+            instance.time = request.POST.get('time')
+            instance.save()
+            return HttpResponse('Data saved successfully.')
+        return render(request, self.template_name, {'form': form})

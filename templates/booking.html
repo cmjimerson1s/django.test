@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
 <h1>Hello</h1>
-<form method="POST">
+<form method="POST" action="{% url 'posted' %}">
 {{data}}
     {% for booking in data %}
         <h3>Room: {{ booking.key }}</h3>
@@ -11,8 +11,11 @@
         <h3>Date: {{ booking.specific_date }}</h3>
         <input type="hidden" name="date" value="{{ booking.specific_date }}">
     {% endfor %}
-    <input type="text" name="name" placeholder="Enter your name">
-    <input type="text" name="email" placeholder="Enter your email">
+        <input type="text" name="name">
+        <input type="text" name="email">
+
+    {% csrf_token %}
+
     <button type="submit">Complete Booking</button> 
 </form>
 <!-- {% for key, values in cart.items %}
