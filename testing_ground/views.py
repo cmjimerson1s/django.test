@@ -7,6 +7,9 @@ from django import forms
 from .forms import MyForm, ResForm, TestForm
 from django.core.cache import cache
 import ast
+import json
+import re
+
 
 
 
@@ -630,49 +633,217 @@ class AvailableGames(View):
         specific_date = '2023-05-07'
         specific_times = Time.objects.all()
         room_list = Room.objects.all()
-
         results = dayView(room_list, specific_date, specific_times)
-        choices = []
-
         context = {
             'selected_date': specific_date,
             'results': results,
-            'choices': choices
         }
 
         return render(request, template, context)
 
     def post(self, request):
         template = 'test1.html'
+        array = []
         selected_room = request.POST.get('key')
         selected_time = request.POST.get('value')
         specific_date = request.POST.get('selected_date')
-        choices = request.POST.get('choices')
-
-        return redirect('selected_games', selected_room=selected_room, selected_time=selected_time, specific_date=specific_date, choices=choices)
+        return redirect('selected_games', selected_room=selected_room, selected_time=selected_time, specific_date=specific_date, array=array)
 
 class SelectedGames(View):
-
-    def get(self, request, selected_room, selected_time, specific_date, choices):
-        template = 'test2.html'
+    template = 'test2.html'
+    def get(self, request, selected_room, selected_time, specific_date, array):
         specific_times = Time.objects.all()
         room_list = Room.objects.all()
         results = dayView(room_list, specific_date, specific_times)
-        reservation = selectionArray(selected_room, selected_time, specific_date)
-        array = []
-        game_choice = list((specific_date,selected_room,selected_time))        
 
-        if not any(d == reservation for d in array):
-            array.append(reservation)
+        url = request.path
+        game_list = url_work(url)
+        game_array = request.session.get('game_array')
 
-        return render(request, template, {'selected_room': selected_room, 'selected_time': selected_time, 'specific_date': specific_date, 'array': array, 'results': results})
+        if not any(d == game_list for d in game_array):
+                game_list.append(game_array)
+        request.session['game_array'] = game_array
+        
+        return render(request, self.template, {'selected_room': selected_room, 'selected_time': selected_time, 'specific_date': specific_date, 'results': results, 'game_array': game_array})
 
-    def post(self, request, selected_room, selected_time, specific_date, choices):
+    def post(self, request, selected_room, selected_time, specific_date, array):
         if request.POST.get('action') == "submit1":
-            template = 'test2.html'
             selected_room = request.POST.get('key')
             selected_time = request.POST.get('value')
-            specific_date = request.POST.get('selected_date')
-            array = request.POST.get('array')
+            specific_date = request.POST.get('specific_date')
+            array = request.POST.getlist('game_array')
+            request.session['game_array'] = array
+            return redirect('selected_games', selected_room=selected_room, selected_time=selected_time, specific_date=specific_date, array=array)
 
-            return render(request, template)
+
+            # game_list = request.POST.getlist('test_data')
+            # url = request.path
+            # new_test_data = url_work(url)
+            # if not any(d == new_test_data for d in game_list):
+            #     new_test_data.append(game_list)
+
+            # return render(request, self.template, {'game_list': game_list, 'results': results})
+
+            # selected_room = request.POST.get('key')
+            # selected_time = request.POST.get('value')
+            # specific_date = request.POST.get('selected_date')
+            # my_array = request.POST.getlist('test_data')
+            # game_choice = list((specific_date,selected_room,selected_time))        
+
+            # if not any(d == game_choice for d in my_array):
+            #     my_array.append(game_choice)
+            
+            
+            # return redirect('selected_games', selected_room=selected_room, selected_time=selected_time, specific_date=specific_date)
+
+            # return render(request, self.template, {'selected_room': selected_room, 'selected_time': selected_time, 'specific_date': specific_date, 'my_array': my_array})
+            # return render(request, self.template, {'selected_room': selected_room, 'selected_time': selected_time, 'specific_date': specific_date, 'array':array})
+
+
+# def parse_url(url):
+#     pattern = r'^selected_games/(\w+)/(\w+)/(\w+)/$'
+#     match = re.match(pattern, url)
+#     if match:
+#         return [match.group(1), match.group(2), match.group(3)]
+#     else:
+#         return []
+
+def url_work(url):
+    # extract the path from the URL
+    path = re.search(r"/selected_games/(.*)", url).group(1)
+    
+    # split the path into parts
+    path_array = path.split("/")
+    
+    # extract the game data
+    selected_room = path_array[0]
+    selected_time = path_array[1]
+    specific_date = path_array[2]
+
+    game_item = [selected_room, selected_time, specific_date]
+    print(game_item)
+    return game_item
+
+
+
+        # array = [game_choice]
+        # if not any(d == game_choice for d in array):
+        #     game_choice.append(array) 
+
+
+class ShoppingView(View):
+    def get(self, request):
+        # Get the items to display on the page
+        specific_date = '2023-05-07'
+        specific_times = Time.objects.all()
+        room_list = Room.objects.all()
+        results = dayView(room_list, specific_date, specific_times)
+
+        context = {'results': results, 'specific_date': specific_date}
+        return render(request, 'shopping.html', context)
+    
+    def post(self, request):
+        # # Get the information about the item the user wants to add to their cart
+        # key = request.POST.get('key')
+        # value = request.POST.get('value')
+        # specific_date = request.POST.get('specific_date')
+        
+        # # Create a dictionary to represent the item and add it to the user's cart
+        # item = {'key': key, 'value': value, 'specific_date': specific_date}
+        # request.session.setdefault('cart', []).append(item)
+        
+        # # Get the updated items to display on the page, including the user's cart
+        # specific_date = '2023-05-07'
+        # specific_times = Time.objects.all()
+        # room_list = Room.objects.all()
+        # results = dayView(room_list, specific_date, specific_times)
+        # cart = request.session.get('cart', [])
+        # context = {'results': results, 'cart': cart, "specific_date": specific_date}
+        # return render(request, 'shopping.html', context)
+    # Get the information about the item the user wants to add to their cart
+        key = request.POST.get('key')
+        value = request.POST.get('value')
+        specific_date = request.POST.get('specific_date')
+
+        # Check if the item is already in the cart
+        cart = request.session.get('cart', [])
+        for item in cart:
+            if item['key'] == key and item['value'] == value and item['specific_date'] == specific_date:
+                # If the item already exists in the cart, do not add it again
+                break
+        else:
+            # If the item does not exist in the cart, add it to the cart
+            item = {'key': key, 'value': value, 'specific_date': specific_date}
+            cart.append(item)
+            request.session['cart'] = cart
+
+
+        if 'delete-all' in request.POST:
+            # Remove all items from the cart
+            request.session.pop('cart', None)
+        elif 'delete-item' in request.POST:
+            # Get the key, value, and specific_date of the item to remove
+            selected = request.POST.get('delete-item')
+            key, value, specific_date = selected.split("|")
+            # Find the item in the cart and remove it
+            for item in request.session.get('cart', []):
+                if item['key'] == key and item['value'] == value and item['specific_date'] == specific_date:
+                    request.session['cart'].remove(item)
+                    request.session.modified = True
+
+                    break
+        # Get the updated items to display on the page, including the user's cart
+
+
+        specific_date = '2023-05-07'
+        specific_times = Time.objects.all()
+        room_list = Room.objects.all()
+        results = dayView(room_list, specific_date, specific_times)
+        cart = [item for item in request.session.get('cart', []) if item.get('key') and item.get('value') and item.get('specific_date')]
+        context = {'results': results, 'cart': cart, "specific_date": specific_date}
+        return render(request, 'shopping.html', context)
+
+class BookingsView(View):
+    def get(self, request):
+        cart = request.session.get('cart', [])
+        context = {'cart': cart}
+        return render(request, 'booking.html', context)
+
+def CartView(request):
+    cart = request.GET.get('cart')
+    string = cart.replace('[', '').replace(']', '').replace('"', '')
+    dataset = ast.literal_eval(string)
+
+    context = {'cart': cart, 'string': string, 'data': dataset }
+    return render(request, 'booking.html', context, )
+
+def update_database(request):
+    if request.method == 'POST':
+        form = TestForm(request.POST)
+        if form.is_valid():
+            instance = form.save(commit=False)
+            instance.date = request.POST.get('date')
+            instance.room = request.POST.get('room')
+            instance.time = request.POST.get('time')
+            instance.save()
+            return HttpResponse('Data saved successfully.')
+    else:
+        form = TestForm(initial={
+            'date': '2023-05-10',  # replace with actual autofilled value
+            'room': 'Room 1',  # replace with actual autofilled value
+            'time': '12:00',  # replace with actual autofilled value
+        })
+    return render(request, 'update_database.html', {'form': form})
+
+def countData(dict):
+    my_dict = dict
+    count = 0
+    for value in my_dict.values():
+        if isinstance(value, str):
+            count += 1
+
+    return count
+
+def testMore(data):
+    my_tuple = tuple(my_dict.items())
+    return my_tuple

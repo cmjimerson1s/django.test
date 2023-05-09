@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block content %}
+{{specific_date}}
+<div class="d-flex flex-row">
+    {% for result in results %}
+        <div class="flex-grow-1">
+                <table>
+                    <thead>
+                        {% for key, values in result.items %}
+                        <tr>
+                            <th>{{key}}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for value in values %}
+                            <tr>
+                            <td id="iterate-{{ forloop.counter }}">
+                            <form method="POST">
+                                {% csrf_token %}
+                                <input type="hidden" name="key" value="{{ key }}">
+                                <input type="hidden" name="value" value="{{ value }}">
+                                <input type="hidden" name="specific_date" value="{{ specific_date }}">
+                                <button type="submit" class="my-button btn btn-primary text-white" data-key="{{ key }}" data-value="{{ value }}">{{ value }}</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    {% endfor %}
+            </tbody>
+        </table>
+    {% endfor %} 
+</div>
+
+
+
+{% if cart %}
+    <h2>Shopping Cart</h2>
+    <ul>
+        {% for item in cart %}
+        <li>{{ item.key }}: {{ item.value }} ({{ item.specific_date }}) 
+        <form method="POST">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger" name="delete-item" value="{{ item.key }}|{{ item.value }}|{{ item.specific_date }}">Delete</button>
+        </form>
+        </li>        
+        {% endfor %}
+    </ul>
+    <form method="POST">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger" name="delete-all" value="true">Delete All Items</button>
+    </form>
+    <form form action="{% url 'booking'%}?cart={{ cart }}" method="post"> 
+        {% csrf_token %}
+        <input type="hidden" name="cart" value={{cart}}>
+        <button type="submit">Continue to Booking</button>
+    </form>
+{% endif %}
+
+<script>
+    // Get all list items using a CSS selector
+    var items = document.querySelectorAll(".my-button");
+  
+    // Loop through each list item
+    items.forEach(function(value) {
+      let counter = 0;
+      // Check if the inner HTML of the item is "501"
+      if (value.innerHTML != "45") {
+        // If it is, change the inner HTML to "888"
+        value.innerHTML = "Available";
+        
+      } else if (value.innerHTML === "45") {
+        value.innerHTML = "Unavailable"
+        value.disabled = true
+      }
+    });
+    </script>
+{% endblock %}
+
+<!-- %}?cart={{ cart }} -->

@@ -20,7 +20,7 @@
                                     <input type="hidden" name="key" value="{{ key }}">
                                     <input type="hidden" name="value" value="{{ value }}">
                                     <input type="hidden" name="selected_date" value="{{ selected_date }}">
-                                    <input type="hidden" name="choices" value="{{ choices }}">
+                                    <input type="hidden" name="start_array" value="{{ start_array }}">
                                     <button type="submit"  class="my-button btn btn-primary text-white" data-key="{{ key }}" data-value="{{ value }}">{{ value }}</button>
                                   </form>
                                 </td>
@@ -32,12 +32,12 @@
         </div>
     {% endfor %} 
   </div>
-  <form method="POST">
+  <!-- <form method="POST">
     {% csrf_token %}
     <input type="hidden" name="var1" value="Hello">
     <input type="hidden" name="var2" value="World">
     <button type="submit">Hello</button>
-  </form>
+  </form> -->
   <script>
     // Get all list items using a CSS selector
     var items = document.querySelectorAll(".my-button");

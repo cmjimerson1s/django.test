@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Hello</h1>
+<form method="POST">
+{{data}}
+    <!-- {% for key in data.items %}
+        {{ key|length }}
+    {% endfor %} -->
+    {% if key|length in data.items == 2 %}
+        <h3>Room: test</h3>
+        <input type="hidden" name="room" value="{{ key }}">
+        <h3>Time: test </h3>
+        <input type="hidden" name="time" value="{{ value }}">
+        <h3>Date: test </h3>
+        <input type="hidden" name="date" value="{{ specific_date }}">
+    {{ else }}
+    {% for booking in data %}
+        <h3>Room: {{ booking.key }}</h3>
+        <input type="hidden" name="room" value="{{ booking.key }}">
+        <h3>Time: {{ booking.value }}</h3>
+        <input type="hidden" name="time" value="{{ booking.value }}">
+        <h3>Date: {{ booking.specific_date }}</h3>
+        <input type="hidden" name="date" value="{{ booking.specific_date }}">
+    {% endfor %}
+    {% endif %}
+<!-- {% for booking in data %}
+    {% if forloop.counter == 0 %}
+    <h3>Room: {{ key }}</h3>
+    <input type="hidden" name="room" value="{{ key }}">
+    <h3>Time: {{ value }}</h3>
+    <input type="hidden" name="time" value="{{ value }}">
+    <h3>Date: {{ specific_date }}</h3>
+    <input type="hidden" name="date" value="{{ specific_date }}">
+    {% else %}
+    <h3>Room: {{ booking.key }}</h3>
+    <input type="hidden" name="room" value="{{ booking.key }}">
+    <h3>Time: {{ booking.value }}</h3>
+    <input type="hidden" name="time" value="{{ booking.value }}">
+    <h3>Date: {{ booking.specific_date }}</h3>
+    <input type="hidden" name="date" value="{{ booking.specific_date }}">
+    {% endif %} -->
+<!-- {% endfor %} -->
+    <input type="text" name="name" placeholder="Enter your name">
+    <input type="text" name="email" placeholder="Enter your email">
+    <button type="submit">Complete Booking</button> 
+
+
+
+</form>
+<!-- {% for key, values in cart.items %}
+    <thead>
+        <tr>
+            <th>{{key}}</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for value in values %}
+            <tr>{{value}}</tr>
+    </tbody>
+        {% endfor %}
+{% endfor %} -->
+{% endblock%}

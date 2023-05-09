@@ -6,6 +6,8 @@
     <h3>{{ specific_date }}</h3>
     <h3>{{ choices }}</h3>
     <h3>{{ array }}</h3>
+    <h3>{{ data }}</h3>
+    <h3>{{ game_array }}</h3>
     <div class="d-flex flex-row">
         {% for result in results %}
             <div class="flex-grow-1">
@@ -20,13 +22,13 @@
                             {% for value in values %}
                                 <tr>
                                     <td id="iterate-{{ forloop.counter }}">
-                                      <form method="POST">
+                                      <form method="POST" name="action" value="submit1">
                                         {% csrf_token %}
-                                        <input type="hidden" name="form_type" value="form1">
+                                        <input type="hidden" name="action" value="submit1">
                                         <input type="hidden" name="key" value="{{ key }}">
                                         <input type="hidden" name="value" value="{{ value }}">
-                                        <input type="hidden" name="selected_date" value="{{ selected_date }}">
-                                        <input type="hidden" name="array" value="{{ array }}">
+                                        <input type="hidden" name="specific_date" value="{{ specific_date }}">
+                                        <input type="hidden" name="game_array" value="{{ game_array }}">
                                         <button type="submit"  class="my-button btn btn-primary text-white" data-key="{{ key }}" data-value="{{ value }}">{{ value }}</button>
                                       </form>
                                     </td>
@@ -40,12 +42,12 @@
       </div>
       <h4>{{var1}}</h4>
       <h4>{{var2}}</h4>
-      <h4>{{array}}</h4>
+      <h4>{{my_array}}</h4>
       {% for var in array %}
         <h4>{{var}}</h4>
       {% endfor %}
 
-      <form method="POST">
+      <!-- <form method="POST">
         {% csrf_token %}
         <input type="hidden" name="action" value="submit1">
         <input type="hidden" name="var1" value="Eat">
@@ -55,7 +57,7 @@
       <form method="POST">
         <input type="hidden" name="action" value="submit2">
         <button type="submit">Book Now 2</button>
-      </form>
+      </form> -->
       <script>
         // Get all list items using a CSS selector
         var items = document.querySelectorAll(".my-button");
