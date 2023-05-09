@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block content %}
+    <h1>Update Test</h1>
+    <h3>{{ selected_room }}</h3>
+    <h3>{{ selected_time }}</h3>
+    <h3>{{ specific_date }}</h3>
+    <h3>{{ choices }}</h3>
+    <h3>{{ array }}</h3>
+    <div class="d-flex flex-row">
+        {% for result in results %}
+            <div class="flex-grow-1">
+                    <table>
+                        <thead>
+                            {% for key, values in result.items %}
+                                <tr>
+                                    <th>{{key}}</th>
+                                </tr>
+                        </thead>
+                        <tbody>
+                            {% for value in values %}
+                                <tr>
+                                    <td id="iterate-{{ forloop.counter }}">
+                                      <form method="POST">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="form_type" value="form1">
+                                        <input type="hidden" name="key" value="{{ key }}">
+                                        <input type="hidden" name="value" value="{{ value }}">
+                                        <input type="hidden" name="selected_date" value="{{ selected_date }}">
+                                        <input type="hidden" name="array" value="{{ array }}">
+                                        <button type="submit"  class="my-button btn btn-primary text-white" data-key="{{ key }}" data-value="{{ value }}">{{ value }}</button>
+                                      </form>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                            {% endfor %}
+                        </tbody>
+                    </table>
+            </div>
+        {% endfor %} 
+      </div>
+      <h4>{{var1}}</h4>
+      <h4>{{var2}}</h4>
+      <h4>{{array}}</h4>
+      {% for var in array %}
+        <h4>{{var}}</h4>
+      {% endfor %}
+
+      <form method="POST">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="submit1">
+        <input type="hidden" name="var1" value="Eat">
+        <input type="hidden" name="var2" value="Shorts">
+        <button type="submit">Book Now 1</button>
+      </form>
+      <form method="POST">
+        <input type="hidden" name="action" value="submit2">
+        <button type="submit">Book Now 2</button>
+      </form>
+      <script>
+        // Get all list items using a CSS selector
+        var items = document.querySelectorAll(".my-button");
+      
+        // Loop through each list item
+        items.forEach(function(value) {
+          let counter = 0;
+          // Check if the inner HTML of the item is "501"
+          if (value.innerHTML != "45") {
+            // If it is, change the inner HTML to "888"
+            value.innerHTML = "Available";
+            
+          } else if (value.innerHTML === "45") {
+            value.innerHTML = "Unavailable"
+            value.disabled = true
+          }
+        });
+        </script>
+{% endblock %}

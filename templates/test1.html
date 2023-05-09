@@ -1,12 +1,5 @@
 {% extends "base.html" %}
 {% block content %}
-{{ specific_date }}
-This was the reservation just chosen {{ reservation }}
-This is every reservation chosen {{ choices }}
-selected_room{{selected_room}} 
-selected_time{{selected_time}}
-specific_date{{specific_date}}
-choices{{choices}}
 <div class="d-flex flex-row">
     {% for result in results %}
         <div class="flex-grow-1">
@@ -23,11 +16,12 @@ choices{{choices}}
                                 <td id="iterate-{{ forloop.counter }}">
                                   <form method="POST">
                                     {% csrf_token %}
+                                    <input type="hidden" name="form_type" value="form1">
                                     <input type="hidden" name="key" value="{{ key }}">
                                     <input type="hidden" name="value" value="{{ value }}">
-                                    <input type="hidden" name="selected_date" value="{{ specific_date }}">
+                                    <input type="hidden" name="selected_date" value="{{ selected_date }}">
                                     <input type="hidden" name="choices" value="{{ choices }}">
-                                    <button type="submit" id="button{{ forloop.counter }}" class="my-button btn btn-primary text-white" data-key="{{ key }}" data-value="{{ value }}">{{ value }}</button>
+                                    <button type="submit"  class="my-button btn btn-primary text-white" data-key="{{ key }}" data-value="{{ value }}">{{ value }}</button>
                                   </form>
                                 </td>
                             </tr>
@@ -38,31 +32,28 @@ choices{{choices}}
         </div>
     {% endfor %} 
   </div>
-    {% for choice in choices %}
-        {% for key, value in choices.items %}
-            <h1>{{ key }}</h1>
-            <h1>{{ value }}</h1>
-        {% endfor %}
-    {% endfor %}
-<form action="{% url 'booking' %}" method="POST">
-  {% csrf_token %}
-  <input type="hidden" name="list_choices" value="{{ choices }}">
-  <button type="submit">Enter Booking Info</button>
-</form>
+  <form method="POST">
+    {% csrf_token %}
+    <input type="hidden" name="var1" value="Hello">
+    <input type="hidden" name="var2" value="World">
+    <button type="submit">Hello</button>
+  </form>
   <script>
     // Get all list items using a CSS selector
     var items = document.querySelectorAll(".my-button");
   
     // Loop through each list item
     items.forEach(function(value) {
+      let counter = 0;
       // Check if the inner HTML of the item is "501"
       if (value.innerHTML != "45") {
         // If it is, change the inner HTML to "888"
         value.innerHTML = "Available";
+        
       } else if (value.innerHTML === "45") {
         value.innerHTML = "Unavailable"
         value.disabled = true
       }
     });
-  </script>  
+    </script>
 {% endblock %}

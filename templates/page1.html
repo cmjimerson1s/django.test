@@ -16,8 +16,9 @@
                       {% for value in values %}
                           <tr>
                               <td id="iterate-{{ forloop.counter }}">
-                                <form method="POST" action="{% url 'reservation' %}" class="me-2 ms-2" required>
+                                <form method="POST">
                                   {% csrf_token %}
+                                  <input type="hidden" name="form_type" value="form1">
                                   <input type="hidden" name="key" value="{{ key }}">
                                   <input type="hidden" name="value" value="{{ value }}">
                                   <input type="hidden" name="selected_date" value="{{ selected_date }}">
@@ -33,11 +34,9 @@
       </div>
   {% endfor %} 
 </div>
-<h1></h1>
-
 <script>
   // Get all list items using a CSS selector
-  var items = document.querySelectorAll("button");
+  var items = document.querySelectorAll(".my-button");
 
   // Loop through each list item
   items.forEach(function(value) {

@@ -1,11 +1,13 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect, get_object_or_404
 from django.views import View
-from .models import Reservation, Time, Room
+from django.views.generic import FormView
+from .models import Reservation, Time, Room, TestModel
 from django.http import HttpResponse, JsonResponse
 from django import forms
-from .forms import MyForm
+from .forms import MyForm, ResForm, TestForm
 from django.core.cache import cache
 import ast
+
 
 
 
@@ -146,11 +148,12 @@ def choiceView(request):
     return HttpResponse(html)
 
 
-def selectionArray(room, time):
+def selectionArray(room, time, date):
     room_data = room
     time_data = time
+    res_date = date
     choice_array = []
-    new_dict = {room_data: time_data}
+    new_dict = {date: {room_data, time_data}}
 
     if new_dict not in choice_array:
         choice_array.append(new_dict)
@@ -290,20 +293,18 @@ def Page2(request):
 
     results = dayView(room_list, specific_date, specific_times)
 
-    reservation = selectionArray(selected_room, selected_time)
+    reservation = selectionArray(selected_room, selected_time, specific_date)
 
     if request.method == 'POST':
-        if select_counter <= 4:
-            if not any(d == reservation for d in array_choice):
-                array_choice.append(reservation)
-                select_counter += 1
-                
+        if not any(d == reservation for d in array_choice):
+            array_choice.append(reservation)
+            
         context = {
             'reservation': reservation,
             'choices': array_choice,
             'results': results,
-            'specific_date': specific_date
-    }
+            'specific_date': specific_date,
+        }
 
         return render(request, template, context)
 
@@ -311,12 +312,12 @@ def Page2(request):
         'reservation': reservation,
         'choices': array_choice,
         'results': results,
-        'specific_date': specific_date
+        'specific_date': specific_date,
     }
   
 
-    html = render(request, template, context)
-    return HttpResponse(html)
+    return render(request, template, context)
+
 
 def SelectedRoomList(list):
     combo_list = list
@@ -330,3 +331,348 @@ def ReturnArray(input):
     result = ast.literal_eval(new_input)
 
     return result
+
+def BookingData(request):
+    template = 'page3.html'
+    game_list = request.POST['list_choices']
+    game_array = ReturnArray(game_list)
+    game_update = TestForm(data=request.POST)
+    date = '2023-05-07'
+    time = '18:00'
+    room = 'Pirate'
+    
+    
+    game_form = TestForm()
+    if request.method == 'POST':
+        game_form = TestForm(data=request.POST)
+        if game_form.is_valid():
+            new_game = game_form.save(commit=False)
+            new_game.date = date
+            new_game.time = time
+            new_game.room = room
+            new_game.save()
+            return redirect('home')
+    else:
+        return redirect('reservation')
+
+
+
+    context = {
+        'choices': game_array,
+        'form': game_update,
+    }
+
+    return render(request, template, context)
+
+
+def Posted(request):
+    template = 'posted.html'
+
+    return render(request, template)
+
+
+def BookingSubmit(request):
+    template = 'page3.html'
+    game_list = request.POST['list_choices']
+    game_array = ReturnArray(game_list)
+    form = TestForm()
+
+    context = {
+        'form': form,
+        'choices': game_array,
+    }
+
+    return render(request, template, context)
+    
+    if request.method == 'POST':
+        for item in game_array:
+            details = item[0].popitem()
+            date, times_and_rooms = details
+            time, room = tuple(times_and_rooms)
+            reservation = TestModel(date=date, time=time, room=room)
+            form = TestForm(request.POST)
+            if form.is_valid():
+                booking_model = form.save(commit=False)
+                booking_model.date = date
+                booking_model.time = time
+                booking_model.room = room
+                booking_model.save()
+                redirect('posted')
+
+  
+    
+        
+    
+
+
+def Test2(request):
+    template = 'test2.html'
+
+    return render(request, template)
+
+def VarCreation(booking_data):
+    details = booking_data[0].popitem()
+    date, times_and_rooms = details
+    time, room = tuple(times_and_rooms)
+    
+    return date, time, room
+
+
+def UpdateReservation(game_array, form):
+    if request.method == 'POST':
+        for item in game_array:
+            details = item[0].popitem()
+            date, times_and_rooms = details
+            time, room = tuple(times_and_rooms)
+            form = TestForm(request.POST)
+            if form.is_valid():
+                booking_model = form.save(commit=False)
+                booking_model.date = date
+                booking_model.time = time
+                booking_model.room = room
+                booking_model.save()
+
+
+def testUpdage(request):
+    template = "page3.html"
+    date = '2023-05-10'
+    time = '18:00'
+    room = 'Pirate'
+    name = 'name'
+    email = 'email'
+
+    form = TestForm()
+    context = {'form': form}  
+    
+    if request.method == 'POST':
+        form = TestForm(request.POST)
+        if form.is_valid():
+            # create a TestModel instance and save it
+            test_model = form.save(commit=False)
+            test_model.name = name
+            test_model.email = email
+            test_model.date = date
+            test_model.time = time
+            test_model.room = room
+            test_model.save()
+            return redirect('posted')
+        else: 
+            return redirect('home')
+        
+        context = {'form': form}
+        return render(request, template, context)
+      
+    return render(request, template, context)
+
+
+class ResUpdates(View):
+
+    def get(self, request):
+        template = 'page2.html'
+        selected_room = request.POST.get['key']
+        selected_time = request.POST.get['value']
+        specific_date = request.POST.get['selected_date']
+        choice_list = request.POST.get['choices']
+        array_choice = ReturnArray(choice_list)
+        specific_times = Time.objects.all()
+        room_list = Room.objects.all()
+        results = dayView(room_list, specific_date, specific_times)
+        reservation = selectionArray(selected_room, selected_time, specific_date)
+
+        context = {
+            'reservation': reservation,
+            'choices': array_choice,
+            'results': results,
+            'specific_date': specific_date,
+        }
+            
+        return render(request, template, context)
+
+    def post(self, request):
+        template = "page3.html"
+
+        return render(request, template)
+
+class NewPageView(FormView):
+    form_class = MyForm
+    template_name = 'page1.html'
+
+    def page_load():
+        specific_date = '2023-05-07'
+        specific_times = Time.objects.all()
+        room_list = Room.objects.all()
+
+        results = dayView(room_list, specific_date, specific_times)
+        context = {
+            'selected_date': specific_date,
+            'results': results,
+            'choices': choices
+        }
+
+        return render(request, template, context)
+
+    def form_valid(self, form):
+        # Redirect to the ResUpdate view with hidden input values
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        selected_key = self.request.POST.get('key')
+        selected_value = self.request.POST.get('value')
+        specific_date = self.request.POST.get('specific_date')
+        url = reverse('res_update')
+        url += f'?selected_key={key}&selected_value={value}&specific_date={specific_date}'
+        return url
+
+
+class RoomSelection(View):
+
+    def get(self, request):
+        template = 'page1.html'
+        specific_date = '2023-05-07'
+        specific_times = Time.objects.all()
+        room_list = Room.objects.all()
+
+        results = dayView(room_list, specific_date, specific_times)
+        choices = []
+
+        context = {
+            'selected_date': specific_date,
+            'results': results,
+            'choices': choices
+        }
+
+        return render(request, template, context)
+
+    def post(self, request):
+        selected_room = request.POST.get('key')
+        selected_time = request.POST.get('value')
+        specific_date = request.POST.get('selected_date')
+        choices = request.POST.get('choices')
+        url = reverse('reservation_update', kwargs={'selected_room': selected_room, 'selected_time': selected_time, 'specific_date': specific_date, 'choices': choices})
+        return redirect(url)
+        # return redirect('reservation', selected_room=selected_room, selected_time=selected_time, specific_date=specific_date, choices=choices)
+
+class ResUpdate(View):
+
+    def get(self, request, selected_room, selected_time, specific_date, choices):
+        template = 'page2.html'
+        # Your code for the get function here using selected_room, selected_time, specific_date variables
+        specific_times = Time.objects.all()
+        room_list = Room.objects.all()
+        results = dayView(room_list, specific_date, specific_times)
+        reservation = selectionArray(selected_room, selected_time, specific_date)
+
+        context = {
+            'reservation': reservation,
+            'choices': choices,
+            'results': results,
+            'specific_date': specific_date,
+        }
+
+        return render(request, template, context)
+
+    def post(self, request):
+        template = "page3.html"
+        # Your code for the post function here
+        return render(request, template)
+
+
+class FirstView(View):
+    def get(self, request):
+        template = 'test1.html'
+
+        return render(request, template)
+
+    def post(self, request):
+        var1 = request.POST.get('var1')
+        var2 = request.POST.get('var2')
+        # Do some processing with my_variable
+        return redirect('second_view', var1=var1, var2=var2)
+
+class SecondView(View):
+    template = 'test2.html'
+    array = []
+
+    def get(self, request, var1, var2):
+        template = 'test2.html'
+        # Do some processing with my_variable
+        words = list((var1, var2))
+          
+        if not any(d == words for d in self.array):
+            self.array.append(words)
+
+        return render(request, template, {'var1': var1, 'var2': var2, 'array': self.array})
+
+    def post(self, request, var1, var2):
+        if request.POST.get('action') == 'submit1':
+            var1 = request.POST.get('var1')
+            var2 = request.POST.get('var2')
+            words = list((var1, var2))
+          
+            if not any(d == words for d in self.array):
+                self.array.append(words)
+            return render(request, self.template, {'var1': var1, 'var2': var2, 'array': self.array})
+        if request.POST.get('action') == 'submit2':
+            our_variable = request.POST.get('our_variable')
+            return redirect('third_view', our_variable=our_variable)
+
+class ThirdView(View):
+
+    def get(self, request, our_variable):
+        template = 'test3.html'
+
+        return render(request, template, {'our_variable': our_variable})
+
+class AvailableGames(View):
+
+    def get(self, request):
+        template = 'test1.html'
+        specific_date = '2023-05-07'
+        specific_times = Time.objects.all()
+        room_list = Room.objects.all()
+
+        results = dayView(room_list, specific_date, specific_times)
+        choices = []
+
+        context = {
+            'selected_date': specific_date,
+            'results': results,
+            'choices': choices
+        }
+
+        return render(request, template, context)
+
+    def post(self, request):
+        template = 'test1.html'
+        selected_room = request.POST.get('key')
+        selected_time = request.POST.get('value')
+        specific_date = request.POST.get('selected_date')
+        choices = request.POST.get('choices')
+
+        return redirect('selected_games', selected_room=selected_room, selected_time=selected_time, specific_date=specific_date, choices=choices)
+
+class SelectedGames(View):
+
+    def get(self, request, selected_room, selected_time, specific_date, choices):
+        template = 'test2.html'
+        specific_times = Time.objects.all()
+        room_list = Room.objects.all()
+        results = dayView(room_list, specific_date, specific_times)
+        reservation = selectionArray(selected_room, selected_time, specific_date)
+        array = []
+        game_choice = list((specific_date,selected_room,selected_time))        
+
+        if not any(d == reservation for d in array):
+            array.append(reservation)
+
+        return render(request, template, {'selected_room': selected_room, 'selected_time': selected_time, 'specific_date': specific_date, 'array': array, 'results': results})
+
+    def post(self, request, selected_room, selected_time, specific_date, choices):
+        if request.POST.get('action') == "submit1":
+            template = 'test2.html'
+            selected_room = request.POST.get('key')
+            selected_time = request.POST.get('value')
+            specific_date = request.POST.get('selected_date')
+            array = request.POST.get('array')
+
+            return render(request, template)

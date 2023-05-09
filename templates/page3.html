@@ -2,10 +2,26 @@
 {% block content %}
 {{ selected_date }}
 {{ update_list }}
-This is what was chosen previosuly: {{ choices }}
-This was what was chosen before {{ new_list }}
-This is the list combined {{ combined_list }}
-<div class="d-flex flex-row">
+List of games {{ choices }}
+{{ date }}
+{{ room }}
+{{ time }}
+{% for choice in choices %}
+    {% for game in choice %}
+      {% for key, values in game.items %}
+        <h1>{{key}}</h1>
+        {% for value in values %}
+          <h1>{{ value }}</h1>
+        {% endfor %}
+      {% endfor %}
+    {% endfor %}
+{% endfor %}
+<form method="POST" action="">
+  {% csrf_token %}
+  <input type="hidden" name="new_choices" value="{{choices}}">
+  <button type="submit">Book Now</button>
+</form>
+<!-- <div class="d-flex flex-row">
     {% for result in results %}
         <div class="flex-grow-1">
                 <table>
@@ -42,10 +58,10 @@ This is the list combined {{ combined_list }}
             <h1>{{ key }}</h1>
             <h1>{{ value }}</h1>
         {% endfor %}
-    {% endfor %}
+    {% endfor %} -->
   <script>
     // Get all list items using a CSS selector
-    var items = document.querySelectorAll("button");
+    var items = document.querySelectorAll(".my-button");
   
     // Loop through each list item
     items.forEach(function(value) {
