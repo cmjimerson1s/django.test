@@ -812,9 +812,14 @@ class BookingsView(View):
 def CartView(request):
     cart = request.GET.get('cart')
     string = cart.replace('[', '').replace(']', '').replace('"', '')
-    dataset = ast.literal_eval(string)
+    game_data = ast.literal_eval(string)
+    if isinstance(game_data, dict):
+    # if dataset is a dictionary, convert it to a tuple
+        dataset = (game_data,)
+    else:
+        dataset = game_data
 
-    context = {'cart': cart, 'string': string, 'data': dataset }
+    context = {'cart': cart, 'string': string, 'data': dataset}
     return render(request, 'booking.html', context, )
 
 def update_database(request):
