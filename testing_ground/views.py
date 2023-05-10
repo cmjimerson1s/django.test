@@ -6,6 +6,7 @@ from django.http import HttpResponse, JsonResponse
 from django import forms
 from .forms import MyForm, ResForm, TestForm
 from django.core.cache import cache
+from django.urls import reverse
 import ast
 import json
 import re
@@ -729,12 +730,25 @@ def url_work(url):
         # array = [game_choice]
         # if not any(d == game_choice for d in array):
         #     game_choice.append(array) 
+def DatesPickers(request):
+    selected_date = request.GET.get('date')
+    url = reverse('results') + f'?selected_date={selected_date}'
+    return redirect(url)
+
+def DatePicker(request):
+    if request.method == 'POST':
+        selected_date = request.POST.get('selected_date')
+        url = reverse('results') + f'?selected_date={selected_date}'
+        return redirect(url)
+
+    return render(request, 'picker.html')
+
 
 
 class ShoppingView(View):
     def get(self, request):
         # Get the items to display on the page
-        specific_date = '2023-05-07'
+        specific_date = request.GET.get('selected_date')
         specific_times = Time.objects.all()
         room_list = Room.objects.all()
         results = dayView(room_list, specific_date, specific_times)
@@ -743,24 +757,6 @@ class ShoppingView(View):
         return render(request, 'shopping.html', context)
     
     def post(self, request):
-        # # Get the information about the item the user wants to add to their cart
-        # key = request.POST.get('key')
-        # value = request.POST.get('value')
-        # specific_date = request.POST.get('specific_date')
-        
-        # # Create a dictionary to represent the item and add it to the user's cart
-        # item = {'key': key, 'value': value, 'specific_date': specific_date}
-        # request.session.setdefault('cart', []).append(item)
-        
-        # # Get the updated items to display on the page, including the user's cart
-        # specific_date = '2023-05-07'
-        # specific_times = Time.objects.all()
-        # room_list = Room.objects.all()
-        # results = dayView(room_list, specific_date, specific_times)
-        # cart = request.session.get('cart', [])
-        # context = {'results': results, 'cart': cart, "specific_date": specific_date}
-        # return render(request, 'shopping.html', context)
-    # Get the information about the item the user wants to add to their cart
         key = request.POST.get('key')
         value = request.POST.get('value')
         specific_date = request.POST.get('specific_date')
@@ -795,7 +791,7 @@ class ShoppingView(View):
         # Get the updated items to display on the page, including the user's cart
 
 
-        specific_date = '2023-05-07'
+        specific_date = request.GET.get('selected_date')
         specific_times = Time.objects.all()
         room_list = Room.objects.all()
         results = dayView(room_list, specific_date, specific_times)
@@ -818,25 +814,52 @@ def CartView(request):
         dataset = (game_data,)
     else:
         dataset = game_data
-    context = {'cart': cart, 'string': string, 'data': dataset,}
+    context = {'data': dataset,}
     return render(request, 'booking.html', context, )
 
-def update_database(request):
-    if request.method == 'POST':
-        name = request.POST.get('name')
-        email = request.POST.get('email')
-        date = request.POST.get('date')
-        room = request.POST.get('room')
-        time = request.POST.get('time')
+def updates_databases(request):
+    template = 'posted.html'
+    cart = request.GET.get('data')
+    string = cart.replace('[', '').replace(']', '').replace('"', '')
+    game_data = ast.literal_eval(string)
+    
+    if isinstance(game_data, dict):
+    # if dataset is a dictionary, convert it to a tuple
+        dataset = (game_data,)
+    else:
+        dataset = game_data
 
-        # Create a new instance of the TestModel and set its attributes
-        instance = TestModel()
-        instance.name = name
-        instance.email = email
-        instance.date = date
-        instance.room = room
-        instance.time = time
-        instance.save()
+    count = sum(isinstance(item, dict) for item in dataset)
+
+    context = {'cart': cart, 'count': count}
+
+    return render(request, template, context)
+
+def update_database(request):
+    cart = request.GET.get('data')
+    string = cart.replace('[', '').replace(']', '').replace('"', '')
+    game_data = ast.literal_eval(string)
+    if isinstance(game_data, dict):
+    # if dataset is a dictionary, convert it to a tuple
+        dataset = (game_data,)
+    else:
+        dataset = game_data
+    if request.method == 'POST':
+        for item in dataset:
+            name = request.POST.get('name')
+            email = request.POST.get('email')
+            date = request.POST.get('date')
+            room = request.POST.get('room')
+            time = request.POST.get('time')
+
+            # Create a new instance of the TestModel and set its attributes
+            instance = TestModel()
+            instance.name = name
+            instance.email = email
+            instance.date = date
+            instance.room = room
+            instance.time = time
+            instance.save()
 
         return HttpResponse('Data saved successfully.')
 
@@ -893,3 +916,36 @@ class UpdateBooking(View):
             instance.save()
             return HttpResponse('Data saved successfully.')
         return render(request, self.template_name, {'form': form})
+
+class CartsViews(View):
+
+    def get(self, request):
+        cart = request.GET.get('cart')
+        string = cart.replace('[', '').replace(']', '').replace('"', '')
+        game_data = ast.literal_eval(string)
+        if isinstance(game_data, dict):
+        # if dataset is a dictionary, convert it to a tuple
+            dataset = (game_data,)
+        else:
+            dataset = game_data
+        context = {'cart': cart, 'string': string, 'data': dataset,}
+        return render(request, 'booking.html', context, )
+
+    def post(self, request):
+        if request.method == 'POST':
+            name = request.POST.get('name')
+            email = request.POST.get('email')
+            date = request.POST.get('date')
+            room = request.POST.get('room')
+            time = request.POST.get('time')
+
+            # Create a new instance of the TestModel and set its attributes
+            instance = TestModel()
+            instance.name = name
+            instance.email = email
+            instance.date = date
+            instance.room = room
+            instance.time = time
+            instance.save()
+
+            return HttpResponse('Data saved successfully.')

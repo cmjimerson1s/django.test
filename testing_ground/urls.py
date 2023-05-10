@@ -6,7 +6,8 @@ from django.urls import path
 
 
 urlpatterns = [
-    path('', views.ShoppingView.as_view(), name='home'),
+    path('', views.DatePicker, name='home'),
+    path('results', views.ShoppingView.as_view(), name='results'),
     # path('', views.FirstView.as_view(), name='home'),
     # path('second_view/<str:var1>/<str:var2>', views.SecondView.as_view(), name='second_view'),
     path('selected_games/<str:selected_room>/<str:selected_time>/<str:specific_date>/<str:array>', views.SelectedGames.as_view(), name='selected_games'),

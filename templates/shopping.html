@@ -1,6 +1,10 @@
 {% extends "base.html" %}
 {% block content %}
-{{specific_date}}
+
+<form method="GET" action="{% url 'results' %}?selected_date={{ selected_date }}">
+{% csrf_token %}
+<input type="date" name="selected_date" value="{{specific_date}}"><button type="submit">Select Date</button>{{specific_date}}
+</form>
 <div class="d-flex flex-row">
     {% for result in results %}
         <div class="flex-grow-1">
